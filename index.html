@@ -518,6 +518,13 @@
       image-rendering: high-quality;
     }
 
+    .wf video {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #000;
+    }
+
     /* Elevated window frame for dark-on-dark screenshots */
     .wf-elevated {
       border-color: rgba(255,255,255,0.11);
@@ -672,6 +679,173 @@
     @media (min-width: 961px) and (max-width: 1280px) {
       .how .wrap { padding: 0 16px; }
       .steps { gap: 14px; }
+    }
+
+    /* ============================================================
+       BEFORE / AFTER VIDEO DEMO
+    ============================================================ */
+    .ba-video-card {
+      position: relative;
+      max-width: 760px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #050506;
+      box-shadow:
+        0 30px 90px rgba(0,0,0,0.62),
+        0 0 90px rgba(200,16,46,0.08);
+    }
+
+    .hero-ba {
+      background: #050506;
+    }
+
+    .ba-stage {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      cursor: ew-resize;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .ba-stage video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .ba-low-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      clip-path: inset(0 50% 0 0);
+      will-change: clip-path;
+    }
+
+    .ba-low-wrap video {
+      width: 100%;
+      filter: none;
+    }
+
+    .ba-label {
+      position: absolute;
+      top: 18px;
+      z-index: 3;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(5,5,6,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: var(--text-h);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .ba-label-before { left: 18px; }
+    .ba-label-after { right: 18px; }
+
+    .hero-window .ba-stage {
+      aspect-ratio: 9 / 16;
+      max-height: min(78vh, 720px);
+    }
+
+    .hero-preview .hero-window {
+      width: min(100%, 420px);
+      margin: 0 auto;
+    }
+
+    .ba-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      z-index: 4;
+      width: 2px;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 0 22px rgba(255,255,255,0.22);
+      transform: translateX(-1px);
+      pointer-events: none;
+      will-change: left;
+    }
+
+    .ba-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5;
+      width: 62px;
+      height: 62px;
+      border: 2px solid rgba(255,255,255,0.88);
+      border-radius: 50%;
+      background: rgba(8,8,10,0.74);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      pointer-events: none;
+      box-shadow: 0 10px 34px rgba(0,0,0,0.46);
+      will-change: left;
+    }
+
+    .ba-handle::before {
+      content: '‹  ›';
+      font-family: var(--ff-display);
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: 5px;
+      margin-left: 5px;
+      line-height: 1;
+    }
+
+    .ba-range {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+    }
+
+    .ba-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 16px 18px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
+    }
+
+    .ba-copy {
+      font-size: 13px;
+      color: rgba(240,237,232,0.62);
+    }
+
+    .ba-chip {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(200,16,46,0.28);
+      background: rgba(200,16,46,0.07);
+      border-radius: 999px;
+      padding: 6px 10px;
     }
 
     /* ============================================================
@@ -1250,6 +1424,10 @@
       }
       /* Activation section: tighten */
       .activation-inner { gap: 32px; }
+
+      .hero-preview { padding-bottom: 48px; }
+      .hero-preview .hero-window { width: min(100%, 360px); }
+      .hero-window .ba-stage { max-height: min(70vh, 640px); }
     }
 
     @media (max-width: 540px) {
@@ -1289,6 +1467,36 @@
       .sec-h2 { font-size: 26px; }
       .how, .features, .activation, .faq, .contact { padding-top: 64px; padding-bottom: 64px; }
 
+      .ba-label {
+        top: auto;
+        bottom: 12px;
+        max-width: 46%;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.25;
+        font-size: 8px;
+        padding: 5px 7px;
+        letter-spacing: 0.03em;
+      }
+
+      .ba-label-before { left: 8px; right: auto; }
+      .ba-label-after { right: 8px; left: auto; }
+
+      .ba-handle {
+        width: 44px;
+        height: 44px;
+      }
+
+      .ba-handle::before {
+        font-size: 20px;
+        letter-spacing: 4px;
+      }
+
+      .ba-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
       .faq-q { font-size: 14px; padding: 15px 16px; }
       .faq-a { padding: 0 16px 16px; font-size: 13px; }
 
@@ -1308,6 +1516,23 @@
       .sec-h2 { font-size: 24px; }
       .cta-h { font-size: 24px; }
       .sec-hdr { margin-bottom: 36px; }
+
+      .hero-preview .hero-window { width: 100%; }
+      .hero-window .ba-stage { max-height: min(68vh, 560px); }
+      .ba-label {
+        bottom: 10px;
+        font-size: 7px;
+        padding: 4px 6px;
+        max-width: 48%;
+      }
+      .ba-handle {
+        width: 40px;
+        height: 40px;
+      }
+      .ba-handle::before {
+        font-size: 18px;
+        letter-spacing: 3px;
+      }
     }
   </style>
 </head>
@@ -1405,10 +1630,19 @@
             <span class="dot dot-g"></span>
             <span class="wf-bar-title">BLACK PHANTOM v2.13.0</span>
           </div>
-          <picture>
-            <source type="image/webp" srcset="assets/screen-video.webp 1x, assets/screen-video@2x.webp 2x">
-            <img src="assets/screen-video@2x.png" srcset="assets/screen-video.png 1x, assets/screen-video@2x.png 2x" alt="BLACK PHANTOM app with gaming footage loaded" data-i18n-alt="alt.heroVideo" decoding="async">
-          </picture>
+          <div class="hero-ba" data-before-after-video>
+            <div class="ba-stage">
+              <video class="ba-original" src="assets/ba-with-phantom.mp4" autoplay muted loop playsinline preload="metadata"></video>
+              <div class="ba-low-wrap">
+                <video class="ba-low" src="assets/ba-without.mp4" autoplay muted loop playsinline preload="metadata"></video>
+              </div>
+              <span class="ba-label ba-label-before" data-i18n="hero.ba.without">On TikTok No Black Phantom</span>
+              <span class="ba-label ba-label-after" data-i18n="hero.ba.with">With Black Phantom</span>
+              <span class="ba-divider" aria-hidden="true"></span>
+              <span class="ba-handle" aria-hidden="true"></span>
+              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Compare TikTok quality with BLACK PHANTOM quality">
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1860,6 +2094,8 @@
         'hero.tagline': 'Professional TikTok quality & publish automation',
         'hero.desc': 'Your desktop tool for gaming creators, motion blur, smart compression, TikTok-grade export, and one-click publish to TikTok Studio.',
         'hero.note': 'One calm workflow from raw clip to published post. Built for creators who care about quality.',
+        'hero.ba.without': 'On TikTok No Black Phantom',
+        'hero.ba.with': 'With Black Phantom',
         'strip.blur.label': 'Motion Blur',
         'strip.blur.desc': 'Professional blur for fast gaming scenes',
         'strip.export.label': 'Smart Export',
@@ -1968,6 +2204,8 @@
         'hero.tagline': 'جودة TikTok احترافية وأتمتة النشر',
         'hero.desc': 'أداة سطح المكتب لصنّاع محتوى الألعاب. ضبابية حركة، ضغط ذكي، تصدير بجودة TikTok، ونشر بنقرة واحدة على TikTok Studio.',
         'hero.note': 'سير عمل واحد هادئ من اللقطة الخام إلى المنشور. لصنّاع يهتمون بالجودة.',
+        'hero.ba.without': 'على TikTok بدون Black Phantom',
+        'hero.ba.with': 'مع Black Phantom',
         'strip.blur.label': 'ضبابية الحركة',
         'strip.blur.desc': 'ضبابية احترافية للمشاهد السريعة في الألعاب',
         'strip.export.label': 'تصدير ذكي',
@@ -2166,6 +2404,38 @@
     });
 
     fiEls.forEach(el => io.observe(el));
+
+    /* Before/after video slider */
+    document.querySelectorAll('[data-before-after-video]').forEach(card => {
+      const range = card.querySelector('.ba-range');
+      const lowWrap = card.querySelector('.ba-low-wrap');
+      const divider = card.querySelector('.ba-divider');
+      const handle = card.querySelector('.ba-handle');
+      const videos = Array.from(card.querySelectorAll('video'));
+      const [originalVideo, lowVideo] = videos;
+
+      function setSlider(value) {
+        const pct = `${value}%`;
+        lowWrap.style.clipPath = `inset(0 0 0 ${value}%)`;
+        divider.style.left = pct;
+        handle.style.left = pct;
+      }
+
+      function syncVideos() {
+        if (!originalVideo || !lowVideo) return;
+        const drift = Math.abs(originalVideo.currentTime - lowVideo.currentTime);
+        if (drift > 0.08) lowVideo.currentTime = originalVideo.currentTime;
+      }
+
+      setSlider(range.value);
+      range.addEventListener('input', () => setSlider(range.value));
+      originalVideo.addEventListener('timeupdate', syncVideos);
+
+      videos.forEach(video => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    });
 
     /* ============================================================
        DYNAMIC PRICING — detect region via IP, show local prices
