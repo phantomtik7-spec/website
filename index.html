@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLACK PHANTOM TikTok Quality Tool for Creators</title>
+  <meta name="description" content="The all-in-one desktop tool for TikTok gaming creators. Motion blur, smart export, and automated publish in one workflow.">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/logo@2x.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --bg:           #0a0a0b;
+      --bg-card:      #111114;
+      --bg-elevated:  #14141a;
+      --border:       #1c1c20;
+      --border-hover: rgba(200,16,46,0.25);
+      --accent:       #c8102e;
+      --accent-glow:  rgba(200,16,46,0.08);
+      --text-h:       #f0ede8;
+      --text-body:    #8a8a8a;
+      --text-muted:   #50504e;
+      --ff-display:   'Plus Jakarta Sans', 'IBM Plex Sans Arabic', sans-serif;
+      --ff-body:      'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+      --ff-ar:        'IBM Plex Sans Arabic', sans-serif;
+      --max:          1160px;
+      --radius:       10px;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-body);
+      font-family: var(--ff-body);
+      font-weight: 500;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Global warm-undertone + top glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 900px 500px at 50% 0%, rgba(200,16,46,0.08) 0%, transparent 65%),
+        radial-gradient(ellipse 1200px 800px at 50% 0%, rgba(40,20,10,0.18) 0%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Very subtle noise overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       LAYOUT UTILITIES
+    ============================================================ */
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    section { position: relative; z-index: 1; }
+
+    /* ============================================================
+       PROMO TICKER — ReelHox
+    ============================================================ */
+    .promo-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 34px;
+      background: #111114;
+      border-bottom: 1px solid rgba(200,16,46,0.2);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .promo-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      white-space: nowrap;
+      animation: promo-scroll 28s linear infinite;
+      will-change: transform;
+    }
+
+    .promo-bar:hover .promo-track { animation-play-state: paused; }
+
+    @keyframes promo-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .promo-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 40px;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(240,237,232,0.55);
+      letter-spacing: 0.01em;
+    }
+
+    .promo-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .promo-link {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid rgba(200,16,46,0.35);
+      padding: 2px 10px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .promo-link:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    .nav {
+      position: fixed;
+      top: 34px; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 32px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      transition: background 0.4s ease, border-color 0.4s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav.scrolled {
+      background: rgba(10,10,11,0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      justify-self: start;
+    }
+
+    .nav-logo-icon {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nav-wordmark {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-h);
+      text-transform: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      justify-self: center;
+    }
+
+    .nav-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(240,237,232,0.72);
+      text-decoration: none;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover { color: var(--text-h); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-self: end;
+    }
+
+    .btn-nav {
+      background: var(--text-h);
+      color: #0a0a0b;
+      font-family: var(--ff-body);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .btn-nav:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* Language switch — pill toggle */
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      gap: 2px;
+    }
+
+    .lang-btn {
+      font-family: var(--ff-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 5px 11px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      min-width: 36px;
+    }
+
+    .lang-btn:hover { color: var(--text-h); }
+
+    .lang-btn.active {
+      background: var(--text-h);
+      color: #0a0a0b;
+    }
+
+    html[lang="ar"] {
+      --ff-display: var(--ff-ar);
+      --ff-body: var(--ff-ar);
+    }
+
+    html[lang="ar"] body {
+      letter-spacing: 0;
+    }
+
+    html[lang="ar"] .nav-wordmark,
+    html[lang="ar"] .footer-wordmark {
+      letter-spacing: 0.02em;
+      text-transform: none;
+    }
+
+    html[lang="ar"] .sec-tag,
+    html[lang="ar"] .cta-meta,
+    html[lang="ar"] .card-spec {
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    html[dir="rtl"] .sec-tag::before {
+      order: 1;
+    }
+
+    html[dir="rtl"] .wf-bar-title {
+      margin-right: 0;
+      margin-left: 31px;
+    }
+
+    html[dir="rtl"] .footer-tagline {
+      margin-left: 0;
+      margin-right: 2px;
+    }
+
+    html[dir="rtl"] .strip-item {
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    html[dir="rtl"] .strip-item:last-child {
+      border-left: none;
+    }
+
+    @media (max-width: 960px) {
+      html[dir="rtl"] .strip-item:nth-child(2) { border-left: none; }
+      html[dir="rtl"] .strip-item:nth-child(3) { border-left: 1px solid var(--border); }
+    }
+
+    @media (max-width: 540px) {
+      html[dir="rtl"] .strip-item { border-left: none; }
+    }
+
+    /* ============================================================
+       HERO — centered logo + brand (Editing News style)
+    ============================================================ */
+    .hero {
+      position: relative;
+      padding: 154px 0 64px;
+      text-align: center;
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 65%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.28) 0%, transparent 100%),
+        radial-gradient(1px 1px at 72% 42%, rgba(255,255,255,0.18) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 78%, rgba(255,255,255,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 18% 88%, rgba(255,255,255,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 48%, rgba(255,255,255,0.22) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 12%, rgba(255,255,255,0.2) 0%, transparent 100%);
+      opacity: 0.55;
+    }
+
+    .hero .wrap {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .hero-logo-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .hero-logo {
+      width: clamp(108px, 14vw, 148px);
+      height: clamp(108px, 14vw, 148px);
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.06),
+        0 0 100px rgba(200,16,46,0.12),
+        0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .hero-divider {
+      width: min(100%, 640px);
+      height: 1px;
+      margin: 28px auto 32px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14) 20%, rgba(255,255,255,0.14) 80%, transparent);
+    }
+
+    .hero-h1 {
+      font-family: var(--ff-display);
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-h);
+      letter-spacing: -0.035em;
+      margin-bottom: 16px;
+    }
+
+    .hero-tagline {
+      font-size: clamp(17px, 2.2vw, 22px);
+      font-weight: 500;
+      line-height: 1.45;
+      color: rgba(240,237,232,0.88);
+      margin-bottom: 18px;
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.75;
+      color: var(--text-body);
+      max-width: 560px;
+      margin: 0 auto 20px;
+    }
+
+    .hero-note {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.8;
+      color: rgba(240,237,232,0.55);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Hero app preview — below fold */
+    .hero-preview {
+      padding: 0 0 80px;
+      position: relative;
+    }
+
+    .hero-visual-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hero-glow {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(200,16,46,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-window {
+      width: 100%;
+      max-width: 920px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       WINDOW FRAME MOCKUP
+    ============================================================ */
+    .wf {
+      background: #0c0c0f;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.025),
+        0 40px 90px rgba(0,0,0,0.7),
+        0 0 70px rgba(200,16,46,0.06);
+    }
+
+    .wf-bar {
+      height: 34px;
+      background: #181820;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 7px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      flex-shrink: 0;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+
+    .wf-bar-title {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      margin-right: 31px; /* offset for dots */
+    }
+
+    .wf picture {
+      display: block;
+      width: 100%;
+    }
+
+    .wf img {
+      display: block;
+      width: 100%;
+      height: auto;
+      -webkit-user-drag: none;
+      user-select: none;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
+    }
+
+    /* Elevated window frame for dark-on-dark screenshots */
+    .wf-elevated {
+      border-color: rgba(255,255,255,0.11);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.05),
+        0 40px 90px rgba(0,0,0,0.7),
+        0 0 80px rgba(200,16,46,0.10);
+    }
+
+    /* Improve step screenshots at tablet/mobile */
+    @media (max-width: 960px) {
+      .step .wf {
+        border-color: rgba(255,255,255,0.09);
+      }
+    }
+
+    /* ============================================================
+       FEATURE STRIP
+    ============================================================ */
+    .strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .strip-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .strip-item {
+      padding: 36px 28px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: background 0.25s;
+    }
+
+    .strip-item:last-child { border-right: none; }
+    .strip-item:hover { background: rgba(200,16,46,0.03); }
+
+    .strip-icon {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .strip-icon svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    .strip-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-h);
+      letter-spacing: -0.01em;
+    }
+
+    .strip-desc {
+      font-size: 13px;
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+
+    /* ============================================================
+       SECTION HEADER (shared)
+    ============================================================ */
+    .sec-hdr { margin-bottom: 58px; }
+
+    .sec-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .sec-tag::before {
+      content: '';
+      display: block;
+      width: 18px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .sec-h2 {
+      font-family: var(--ff-display);
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 700;
+      color: var(--text-h);
+      letter-spacing: -0.03em;
+      line-height: 1.14;
+    }
+
+    .sec-sub {
+      font-size: 15px;
+      color: var(--text-body);
+      margin-top: 12px;
+      max-width: 480px;
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       HOW IT WORKS
+    ============================================================ */
+    .how { padding: 110px 0; }
+
+    .how .wrap {
+      max-width: min(1680px, calc(100vw - 40px));
+      padding: 0 20px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .step .wf {
+      border-color: rgba(255,255,255,0.09);
+    }
+
+    .step-body {
+      margin-top: 4px;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-h);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .step-desc { font-size: 13px; color: var(--text-body); line-height: 1.65; }
+
+    @media (min-width: 961px) and (max-width: 1280px) {
+      .how .wrap { padding: 0 16px; }
+      .steps { gap: 14px; }
+    }
+
+    /* ============================================================
+       FEATURE DEEP-DIVE CARDS
+    ============================================================ */
+    .features { padding: 0 0 110px; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 34px 38px;
+      box-shadow: 0 0 60px rgba(200,16,46,0.03);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 60px rgba(200,16,46,0.1);
+      border-color: var(--border-hover);
+    }
+
+    .card-ico {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 18px;
+      display: block;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+    .card-ico svg { width: 24px; height: 24px; }
+
+    .card-title {
+      font-family: var(--ff-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-h);
+      margin-bottom: 10px;
+      letter-spacing: -0.015em;
+    }
+
+    .card-desc { font-size: 14px; color: var(--text-body); line-height: 1.72; }
+
+    .card-spec {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(200,16,46,0.06);
+      border: 1px solid rgba(200,16,46,0.15);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       ACTIVATION / PRICING SECTION
+    ============================================================ */
+    .activation {
+      padding: 110px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activation-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    .activation-content .sec-h2 { margin-bottom: 16px; }
+
+    .activation-body {
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.72;
+      margin-bottom: 28px;
+    }
+
+    /* Pricing cards */
+    .price-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .price-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 20px;
+      position: relative;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+
+    .price-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+    }
+
+    .price-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(145deg, rgba(200,16,46,0.08) 0%, var(--bg-card) 60%);
+    }
+
+    .price-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(200,16,46,0.12);
+      border: 1px solid rgba(200,16,46,0.25);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .price-plan-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .price-amount {
+      font-family: var(--ff-display);
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-h);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .price-period {
+      font-size: 12px;
+      color: var(--text-body);
+      margin-bottom: 14px;
+    }
+
+    .price-feat-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .price-feat-list li {
+      font-size: 12px;
+      color: var(--text-body);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .price-feat-list li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+
+    .price-region {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .price-region-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #28c840;
+      flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .price-trial-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price-trial-note::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .tiers {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tier {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-h);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 5px 16px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .tier:hover {
+      border-color: var(--border-hover);
+      background: rgba(200,16,46,0.04);
+    }
+
+    /* ============================================================
+       FAQ
+    ============================================================ */
+    .faq {
+      padding: 110px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+
+    .faq-item.open {
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .faq-q {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: start;
+      font-family: var(--ff-body);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-h);
+      line-height: 1.45;
+    }
+
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+
+    .faq-chevron {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: transform 0.25s, border-color 0.25s, background 0.25s;
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+      border-color: rgba(200,16,46,0.3);
+      background: rgba(200,16,46,0.06);
+      color: var(--text-h);
+    }
+
+    .faq-a {
+      display: none;
+      padding: 0 22px 20px;
+      font-size: 14px;
+      color: var(--text-body);
+      line-height: 1.75;
+    }
+
+    .faq-item.open .faq-a { display: block; }
+
+    /* ============================================================
+       CONTACT — Telegram only
+    ============================================================ */
+    .contact {
+      padding: 0 0 110px;
+    }
+
+    .contact-hdr {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+
+    .contact-hdr .sec-sub {
+      margin: 12px auto 0;
+      max-width: 100%;
+    }
+
+    .contact-card {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 44px 36px;
+    }
+
+    .contact-ico {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-h);
+    }
+
+    .contact-ico svg { width: 24px; height: 24px; }
+
+    .contact-card-desc {
+      font-size: 14px;
+      color: var(--text-body);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .btn-telegram {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: var(--text-h);
+      color: #0a0a0b;
+      border-radius: 999px;
+      text-decoration: none;
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-telegram:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-telegram svg { flex-shrink: 0; }
+
+    .contact-handle {
+      display: block;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ============================================================
+       DOWNLOAD / CTA
+    ============================================================ */
+    .cta-section {
+      padding: 140px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(200,16,46,0.08) 0%, transparent 68%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .cta-section .wrap { position: relative; z-index: 1; }
+
+    .cta-h {
+      font-family: var(--ff-display);
+      font-size: clamp(34px, 5vw, 60px);
+      font-weight: 800;
+      color: var(--text-h);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .cta-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      margin-bottom: 46px;
+    }
+
+    .btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--ff-display);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 18px 42px;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 60px rgba(200,16,46,0.28);
+      letter-spacing: 0.015em;
+    }
+
+    .btn-dl:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 80px rgba(200,16,46,0.52);
+    }
+
+    .btn-dl svg { flex-shrink: 0; }
+
+    .cta-support {
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .cta-support a {
+      color: var(--text-body);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .cta-support a:hover { color: var(--text-h); }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      padding: 36px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .footer-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .footer-wordmark {
+      font-family: var(--ff-display);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--text-h);
+      text-transform: uppercase;
+    }
+
+    .footer-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+    /* ============================================================
+       SCROLL FADE-IN
+    ============================================================ */
+    .fi {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .fi.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 960px) {
+      .wrap { padding: 0 24px; }
+      .nav  { padding: 0 20px; grid-template-columns: 1fr auto; }
+      .nav-links { display: none; }
+
+      .strip-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .strip-item:nth-child(2) { border-right: none; }
+      .strip-item:nth-child(3) { border-right: 1px solid var(--border); }
+      .strip-item:nth-child(1),
+      .strip-item:nth-child(2) { border-bottom: 1px solid var(--border); }
+
+      .how .wrap {
+        max-width: var(--max);
+        padding: 0 24px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        max-width: 920px;
+        margin: 0 auto;
+      }
+      .cards-grid { grid-template-columns: 1fr; }
+      .activation-inner { grid-template-columns: 1fr; gap: 48px; }
+
+      .hero { padding: 100px 0 48px; min-height: auto; }
+      .hero-preview { padding-bottom: 60px; }
+      .how, .features, .activation, .faq, .contact, .cta-section { padding-top: 80px; padding-bottom: 80px; }
+    }
+
+    @media (max-width: 540px) {
+      .nav-wordmark { display: none; }
+      .hero-h1 { font-size: 38px; }
+
+      .strip-row { grid-template-columns: 1fr; }
+      .strip-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .strip-item:last-child { border-bottom: none; }
+
+      .card { padding: 24px 22px; }
+      .cta-h { font-size: 30px; }
+      .btn-dl { padding: 16px 24px; font-size: 14px; }
+
+      .footer-tagline { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       PROMO TICKER — ReelHox
+  ========================================================= -->
+  <div class="promo-bar" role="marquee" aria-label="ReelHox promotion">
+    <div class="promo-track" id="promoTrack">
+      <!-- repeated twice for seamless loop -->
+      <span class="promo-item">
+        <span class="promo-dot"></span>
+        <span data-i18n="promo.text">حمّل فيديوهات TikTok وInstagram بدون علامة مائية</span>
+        <span class="promo-dot"></span>
+        <span data-i18n="promo.text2">معلومات عن أي يوزر TikTok في ثانية</span>
+        <span class="promo-dot"></span>
+        <a href="https://www.reelhox.com/" target="_blank" rel="noopener" class="promo-link" data-i18n="promo.cta">اضغط هنا ← ReelHox</a>
+      </span>
+      <span class="promo-item">
+        <span class="promo-dot"></span>
+        <span data-i18n="promo.text">حمّل فيديوهات TikTok وInstagram بدون علامة مائية</span>
+        <span class="promo-dot"></span>
+        <span data-i18n="promo.text2">معلومات عن أي يوزر TikTok في ثانية</span>
+        <span class="promo-dot"></span>
+        <a href="https://www.reelhox.com/" target="_blank" rel="noopener" class="promo-link" data-i18n="promo.cta">اضغط هنا ← ReelHox</a>
+      </span>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       NAVBAR
+  ========================================================= -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">
+      <img class="nav-logo-icon" src="assets/logo.png" srcset="assets/logo.png 1x, assets/logo@2x.png 2x" width="28" height="28" alt="BLACK PHANTOM">
+      <span class="nav-wordmark">BLACK PHANTOM</span>
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link" data-i18n="nav.home">Home</a>
+      <a href="#how-it-works" class="nav-link" data-i18n="nav.how">How it works</a>
+      <a href="#features" class="nav-link" data-i18n="nav.features">Features</a>
+      <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
+      <a href="#contact" class="nav-link" data-i18n="nav.contact">Contact</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn" data-lang="ar">AR</button>
+        <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      </div>
+      <a href="#download" class="btn-nav" data-i18n="nav.download">Download</a>
+    </div>
+  </nav>
+
+
+  <!-- =========================================================
+       HERO
+  ========================================================= -->
+  <section class="hero">
+    <div class="hero-stars" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-logo-wrap">
+        <img class="hero-logo" src="assets/logo-hero.png" srcset="assets/logo-hero.png 1x, assets/logo@2x.png 2x" width="148" height="148" alt="BLACK PHANTOM">
+      </div>
+
+      <div class="hero-divider" aria-hidden="true"></div>
+
+      <h1 class="hero-h1" data-i18n="hero.title">BLACK PHANTOM</h1>
+
+      <p class="hero-tagline" data-i18n="hero.tagline">Professional TikTok quality &amp; publish automation</p>
+
+      <p class="hero-desc" data-i18n="hero.desc">
+        Your desktop tool for gaming creators, motion blur, smart compression, TikTok-grade export, and one-click publish to TikTok Studio.
+      </p>
+
+      <p class="hero-note" data-i18n="hero.note">
+        One calm workflow from raw clip to published post. Built for creators who care about quality.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       HERO PREVIEW
+  ========================================================= -->
+  <section class="hero-preview">
+    <div class="wrap">
+      <div class="hero-visual-wrap fi">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-window wf">
+          <div class="wf-bar">
+            <span class="dot dot-r"></span>
+            <span class="dot dot-y"></span>
+            <span class="dot dot-g"></span>
+            <span class="wf-bar-title">BLACK PHANTOM v2.11.0</span>
+          </div>
+          <picture>
+            <source type="image/webp" srcset="assets/screen-video.webp 1x, assets/screen-video@2x.webp 2x">
+            <img src="assets/screen-video@2x.png" srcset="assets/screen-video.png 1x, assets/screen-video@2x.png 2x" alt="BLACK PHANTOM app with gaming footage loaded" data-i18n-alt="alt.heroVideo" decoding="async">
+          </picture>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FEATURE STRIP
+  ========================================================= -->
+  <div class="strip">
+    <div class="wrap">
+      <div class="strip-row">
+        <div class="strip-item fi">
+          <!-- Film strip — Motion Blur -->
+          <span class="strip-icon">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1.5" y="4.5" width="19" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 4.5V17.5M16 4.5V17.5" stroke="currentColor" stroke-width="1" stroke-opacity="0.4"/>
+              <rect x="1.5" y="7.5" width="2.5" height="2" rx="0.4" fill="currentColor"/>
+              <rect x="1.5" y="12.5" width="2.5" height="2" rx="0.4" fill="currentColor"/>
+              <rect x="18" y="7.5" width="2.5" height="2" rx="0.4" fill="currentColor"/>
+              <rect x="18" y="12.5" width="2.5" height="2" rx="0.4" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="strip-label" data-i18n="strip.blur.label">Motion Blur</span>
+          <span class="strip-desc" data-i18n="strip.blur.desc">Professional blur for fast gaming scenes</span>
+        </div>
+        <div class="strip-item fi">
+          <!-- Upload arrow — Smart Export -->
+          <span class="strip-icon">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M11 13V2M7 6l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 14.5v3.5a1.5 1.5 0 001.5 1.5h11a1.5 1.5 0 001.5-1.5v-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="strip-label" data-i18n="strip.export.label">Smart Export</span>
+          <span class="strip-desc" data-i18n="strip.export.desc">Highest TikTok-compatible quality</span>
+        </div>
+        <div class="strip-item fi">
+          <!-- Lightning bolt — Auto Upload -->
+          <span class="strip-icon">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M13 2L4 13h7l-2 7 9-11h-7l2-7z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="strip-label" data-i18n="strip.upload.label">Auto Upload</span>
+          <span class="strip-desc" data-i18n="strip.upload.desc">One click to TikTok Studio</span>
+        </div>
+        <div class="strip-item fi">
+          <!-- Concentric target — Quality Tier -->
+          <span class="strip-icon">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="11" cy="11" r="5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="strip-label" data-i18n="strip.tier.label">Quality Tier</span>
+          <span class="strip-desc" data-i18n="strip.tier.desc">Blue tier, 1080p, 60fps</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       HOW IT WORKS
+  ========================================================= -->
+  <section class="how" id="how-it-works">
+    <div class="wrap">
+      <header class="sec-hdr fi">
+        <span class="sec-tag" data-i18n="how.tag">How It Works</span>
+        <h2 class="sec-h2" data-i18n="how.title" data-i18n-html>Three steps to<br>TikTok-grade quality.</h2>
+        <p class="sec-sub" data-i18n="how.sub">From raw footage to published. BLACK PHANTOM handles the full pipeline without leaving your desk.</p>
+      </header>
+
+      <div class="steps">
+        <!-- Step 1 -->
+        <article class="step fi">
+          <div class="wf">
+            <div class="wf-bar">
+              <span class="dot dot-r"></span>
+              <span class="dot dot-y"></span>
+              <span class="dot dot-g"></span>
+              <span class="wf-bar-title" data-i18n="how.step1.window">Import</span>
+            </div>
+            <picture>
+              <source type="image/webp" srcset="assets/screen-empty.webp 1x, assets/screen-empty@2x.webp 2x">
+              <img src="assets/screen-empty@2x.png" srcset="assets/screen-empty.png 1x, assets/screen-empty@2x.png 2x" alt="Empty app state, ready to import footage" data-i18n-alt="alt.step1" loading="lazy" decoding="async">
+            </picture>
+          </div>
+          <div class="step-body">
+            <div class="step-title" data-i18n="how.step1.title">Import Your Video</div>
+            <p class="step-desc" data-i18n="how.step1.desc">Drop your raw gaming footage into BLACK PHANTOM. Supports 1080p, 60fps, any resolution.</p>
+          </div>
+        </article>
+
+        <!-- Step 2 -->
+        <article class="step fi">
+          <div class="wf">
+            <div class="wf-bar">
+              <span class="dot dot-r"></span>
+              <span class="dot dot-y"></span>
+              <span class="dot dot-g"></span>
+              <span class="wf-bar-title" data-i18n="how.step2.window">Configure</span>
+            </div>
+            <picture>
+              <source type="image/webp" srcset="assets/screen-panel.webp 1x, assets/screen-panel@2x.webp 2x">
+              <img src="assets/screen-panel@2x.png" srcset="assets/screen-panel.png 1x, assets/screen-panel@2x.png 2x" alt="Settings panel with quality options" data-i18n-alt="alt.step2" loading="lazy" decoding="async">
+            </picture>
+          </div>
+          <div class="step-body">
+            <div class="step-title" data-i18n="how.step2.title">Apply Your Settings</div>
+            <p class="step-desc" data-i18n="how.step2.desc">Choose your filter, enable motion blur or compression if you need them, then pick export quality.</p>
+          </div>
+        </article>
+
+        <!-- Step 3 -->
+        <article class="step fi">
+          <div class="wf">
+            <div class="wf-bar">
+              <span class="dot dot-r"></span>
+              <span class="dot dot-y"></span>
+              <span class="dot dot-g"></span>
+              <span class="wf-bar-title" data-i18n="how.step3.window">Export &amp; Publish</span>
+            </div>
+            <picture>
+              <source type="image/webp" srcset="assets/screen-video.webp 1x, assets/screen-video@2x.webp 2x">
+              <img src="assets/screen-video@2x.png" srcset="assets/screen-video.png 1x, assets/screen-video@2x.png 2x" alt="Export screen with video ready to publish" data-i18n-alt="alt.step3" loading="lazy" decoding="async">
+            </picture>
+          </div>
+          <div class="step-body">
+            <div class="step-title" data-i18n="how.step3.title">Export &amp; Publish</div>
+            <p class="step-desc" data-i18n="how.step3.desc">Export your video. BLACK PHANTOM prepares it for TikTok and can publish to TikTok Studio automatically.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FEATURE DEEP-DIVE CARDS
+  ========================================================= -->
+  <section class="features" id="features">
+    <div class="wrap">
+      <header class="sec-hdr fi">
+        <span class="sec-tag" data-i18n="features.tag">Features</span>
+        <h2 class="sec-h2" data-i18n="features.title" data-i18n-html>Built for quality.<br>Designed for speed.</h2>
+      </header>
+
+      <div class="cards-grid">
+        <article class="card fi">
+          <!-- Shield + checkmark — Quality Stack -->
+          <span class="card-ico">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 2L3 6.5V12c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V6.5L12 2z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div class="card-title" data-i18n="features.quality.title">Quality Stack</div>
+          <p class="card-desc" data-i18n="features.quality.desc">Built-in quality pipeline helps your video stay sharp on TikTok. Optimized for 1080×1920 gaming content, without manual tweaking.</p>
+          <span class="card-spec" data-i18n="features.quality.spec">1080×1920, TikTok-ready</span>
+        </article>
+
+        <article class="card fi">
+          <!-- Film clapperboard — Motion Blur Engine -->
+          <span class="card-ico">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M7 7V4M12 7V4M17 7V4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="M2 10.5h20" stroke="currentColor" stroke-width="1.2" stroke-opacity="0.4"/>
+              <circle cx="12" cy="16" r="3" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+          </span>
+          <div class="card-title" data-i18n="features.blur.title">Motion Blur Engine</div>
+          <p class="card-desc" data-i18n="features.blur.desc">Professional motion blur built into export. Smooth, cinematic feel for fast gaming clips.</p>
+          <span class="card-spec" data-i18n="features.blur.spec">Motion Blur, Built-in</span>
+        </article>
+
+        <article class="card fi">
+          <!-- Compress arrows — Smart Compression -->
+          <span class="card-ico">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M14 10l6-6M20 10V4h-6M10 14l-6 6M4 14v6h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="8.5" y="8.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          <div class="card-title" data-i18n="features.compress.title">Smart Compression</div>
+          <p class="card-desc" data-i18n="features.compress.desc">Optional compression keeps your file TikTok-friendly while preserving detail where it matters.</p>
+          <span class="card-spec" data-i18n="features.compress.spec">Smart Compress, Optional</span>
+        </article>
+
+        <article class="card fi">
+          <!-- Paper plane / send — One-Click Publish -->
+          <span class="card-ico">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div class="card-title" data-i18n="features.publish.title">One-Click Publish</div>
+          <p class="card-desc" data-i18n="features.publish.desc">Fill your caption and hashtags, then hit publish. BLACK PHANTOM drives TikTok Studio automation end-to-end, hands-free.</p>
+          <span class="card-spec" data-i18n="features.publish.spec">TikTok Studio, Automated</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       ACTIVATION / LICENSING
+  ========================================================= -->
+  <section class="activation" id="activation">
+    <div class="wrap">
+      <div class="activation-inner">
+
+        <div class="activation-content fi">
+          <span class="sec-tag" data-i18n="license.tag">Licensing</span>
+          <h2 class="sec-h2" data-i18n="license.title" data-i18n-html>One Key.<br>One Device.</h2>
+          <p class="activation-body" data-i18n="license.body">Download and try BLACK PHANTOM free for 2 days. Then activate with a monthly or 3-month license key. One device per key.</p>
+
+          <div class="price-cards">
+            <!-- Monthly -->
+            <div class="price-card">
+              <div class="price-plan-label" data-i18n="license.planMonthly">Monthly</div>
+              <div class="price-amount" id="priceMonthlyAmt">$10</div>
+              <div class="price-period" data-i18n="license.perMonth">per month</div>
+              <ul class="price-feat-list">
+                <li data-i18n="license.feat1">Full access</li>
+                <li data-i18n="license.feat2">1 device</li>
+                <li data-i18n="license.feat3">All updates</li>
+              </ul>
+            </div>
+            <!-- 3 Months -->
+            <div class="price-card featured">
+              <div class="price-badge" data-i18n="license.bestValue">Best Value</div>
+              <div class="price-plan-label" data-i18n="license.planQuarterly">3 Months</div>
+              <div class="price-amount" id="priceQuarterlyAmt">$15</div>
+              <div class="price-period" data-i18n="license.per3Months">for 3 months</div>
+              <ul class="price-feat-list">
+                <li data-i18n="license.feat1">Full access</li>
+                <li data-i18n="license.feat2">1 device</li>
+                <li data-i18n="license.feat3">All updates</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="price-trial-note" data-i18n="license.trialNote">2-day free trial on every download</p>
+        </div>
+
+        <div class="fi">
+          <div class="wf wf-elevated">
+            <div class="wf-bar">
+              <span class="dot dot-r"></span>
+              <span class="dot dot-y"></span>
+              <span class="dot dot-g"></span>
+              <span class="wf-bar-title" data-i18n="license.window">Activation</span>
+            </div>
+            <picture>
+              <source type="image/webp" srcset="assets/screen-activate.webp 1x, assets/screen-activate@2x.webp 2x">
+              <img src="assets/screen-activate@2x.png" srcset="assets/screen-activate.png 1x, assets/screen-activate@2x.png 2x" alt="License activation screen" data-i18n-alt="alt.activate" loading="lazy" decoding="async">
+            </picture>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FAQ
+  ========================================================= -->
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <header class="sec-hdr fi" style="text-align:center;max-width:640px;margin:0 auto 48px;">
+        <span class="sec-tag" data-i18n="faq.tag" style="justify-content:center;">FAQ</span>
+        <h2 class="sec-h2" data-i18n="faq.title">Questions creators ask</h2>
+        <p class="sec-sub" data-i18n="faq.sub" style="margin-left:auto;margin-right:auto;">Clear answers about activation, quality, and publishing with BLACK PHANTOM.</p>
+      </header>
+
+      <div class="faq-list fi">
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q1">How do I activate my license?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a1">Enter your key on first launch. One license per device. Make sure there are no extra spaces. If you changed PC, contact us on Telegram and we will help.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q2">Why does my video look low quality on my profile?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a2">TikTok often shows a softer preview on your own account. Open the post from another account or ask a friend. That is what viewers actually see.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q3">How do I get the best quality on TikTok?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a3">Import your video into BLACK PHANTOM, set blur or compress if needed, then export and publish through the app. Avoid re-uploading old files outside the workflow.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q4">Upload failed or got stuck. What should I do?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a4">Stay logged into TikTok Studio, keep a stable connection, and do not close the app while uploading. Restart BLACK PHANTOM and try again.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q5">Can I use one license on two computers?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a5">Each license works on one Windows device. If you replaced your PC, message support on Telegram.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q6">What video formats are supported?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a6">Import common video formats and export TikTok-ready MP4 from the app. Always publish through BLACK PHANTOM. Do not rename or convert files manually.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q7">Low reach after posting. Is it the tool?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a7">Reach depends on your content, timing, and account health. Not export alone. Strong hooks, relevant hashtags, and consistent posting matter most.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-q" aria-expanded="false">
+            <span data-i18n="faq.q8">When should I use blur or compress?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="faq-a"><p data-i18n="faq.a8">Motion blur smooths fast gaming scenes. Compress helps large files before upload. Both are optional in Settings. Use what fits your clip.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       CONTACT
+  ========================================================= -->
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <header class="contact-hdr fi">
+        <span class="sec-tag" data-i18n="contact.tag" style="justify-content:center;">Contact</span>
+        <h2 class="sec-h2" data-i18n="contact.title">Get in touch</h2>
+        <p class="sec-sub" data-i18n="contact.sub">Support, licenses, and questions. Reach us directly on Telegram.</p>
+      </header>
+
+      <div class="contact-card fi">
+        <div class="contact-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="contact-card-desc" data-i18n="contact.desc">Fast replies for activation help, usage questions, and general support.</p>
+        <a href="https://t.me/Pha_tik" class="btn-telegram" target="_blank" rel="noopener">
+          <span data-i18n="contact.btn">Open Telegram</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 2L7 9M14 2l-4 12-3-5-5-2 12-3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <span class="contact-handle">@Pha_tik</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       DOWNLOAD / CTA
+  ========================================================= -->
+  <section class="cta-section" id="download">
+    <div class="wrap">
+      <h2 class="cta-h fi" data-i18n="cta.title" data-i18n-html>Ready to dominate<br>your TikTok feed?</h2>
+      <p class="cta-meta fi" data-i18n="cta.meta">v2.11.0, Windows 10/11, No admin required</p>
+      <div class="fi">
+        <a href="#download" class="btn-dl">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M9 1.5v9M5 8l4 4 4-4M2.5 16.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span data-i18n="cta.btn">Download BLACK PHANTOM v2.11.0</span>
+        </a>
+      </div>
+      <p class="cta-support fi"><span data-i18n="cta.support">Contact support: Telegram</span> <a href="https://t.me/Pha_tik" target="_blank" rel="noopener">@Pha_tik</a></p>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FOOTER
+  ========================================================= -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-row">
+        <a href="#" class="footer-brand">
+          <img class="footer-logo" src="assets/logo.png" srcset="assets/logo.png 1x, assets/logo@2x.png 2x" width="24" height="24" alt="BLACK PHANTOM">
+          <span class="footer-wordmark">Black Phantom</span>
+          <span class="footer-tagline" data-i18n="footer.tagline">TikTok Quality. Built for creators.</span>
+        </a>
+        <span class="footer-copy" data-i18n="footer.copy">© 2026 Team Berlin</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- =========================================================
+       JAVASCRIPT
+  ========================================================= -->
+  <script>
+    /* ============================================================
+       i18n — English / Arabic
+    ============================================================ */
+    const LANG_KEY = 'bp-lang';
+
+    const T = {
+      en: {
+        'meta.title': 'BLACK PHANTOM TikTok Quality Tool for Creators',
+        'meta.description': 'The all-in-one desktop tool for TikTok gaming creators. Motion blur, smart export, and automated publish in one workflow.',
+        'nav.download': 'Download',
+        'nav.home': 'Home',
+        'nav.how': 'How it works',
+        'nav.features': 'Features',
+        'nav.faq': 'FAQ',
+        'nav.contact': 'Contact',
+        'hero.title': 'BLACK PHANTOM',
+        'hero.tagline': 'Professional TikTok quality & publish automation',
+        'hero.desc': 'Your desktop tool for gaming creators, motion blur, smart compression, TikTok-grade export, and one-click publish to TikTok Studio.',
+        'hero.note': 'One calm workflow from raw clip to published post. Built for creators who care about quality.',
+        'strip.blur.label': 'Motion Blur',
+        'strip.blur.desc': 'Professional blur for fast gaming scenes',
+        'strip.export.label': 'Smart Export',
+        'strip.export.desc': 'Highest TikTok-compatible quality',
+        'strip.upload.label': 'Auto Upload',
+        'strip.upload.desc': 'One click to TikTok Studio',
+        'strip.tier.label': 'Quality Tier',
+        'strip.tier.desc': 'Blue tier, 1080p, 60fps',
+        'how.tag': 'How It Works',
+        'how.title': 'Three steps to<br>TikTok-grade quality.',
+        'how.sub': 'From raw footage to published. BLACK PHANTOM handles the full pipeline without leaving your desk.',
+        'how.step1.window': 'Import',
+        'how.step1.title': 'Import Your Video',
+        'how.step1.desc': 'Drop your raw gaming footage into BLACK PHANTOM. Supports 1080p, 60fps, any resolution.',
+        'how.step2.window': 'Configure',
+        'how.step2.title': 'Apply Your Settings',
+        'how.step2.desc': 'Choose your filter, enable motion blur or compression if you need them, then pick export quality.',
+        'how.step3.window': 'Export & Publish',
+        'how.step3.title': 'Export & Publish',
+        'how.step3.desc': 'Export your video. BLACK PHANTOM prepares it for TikTok and can publish to TikTok Studio automatically.',
+        'features.tag': 'Features',
+        'features.title': 'Built for quality.<br>Designed for speed.',
+        'features.quality.title': 'Quality Stack',
+        'features.quality.desc': 'Built-in quality pipeline helps your video stay sharp on TikTok. Optimized for 1080×1920 gaming content, without manual tweaking.',
+        'features.quality.spec': '1080×1920, TikTok-ready',
+        'features.blur.title': 'Motion Blur Engine',
+        'features.blur.desc': 'Professional motion blur built into export. Smooth, cinematic feel for fast gaming clips.',
+        'features.blur.spec': 'Motion Blur, Built-in',
+        'features.compress.title': 'Smart Compression',
+        'features.compress.desc': 'Optional compression keeps your file TikTok-friendly while preserving detail where it matters.',
+        'features.compress.spec': 'Smart Compress, Optional',
+        'features.publish.title': 'One-Click Publish',
+        'features.publish.desc': 'Fill your caption and hashtags, then hit publish. BLACK PHANTOM drives TikTok Studio automation end-to-end, hands-free.',
+        'features.publish.spec': 'TikTok Studio, Automated',
+        'license.tag': 'Licensing',
+        'license.title': 'One Key.<br>One Device.',
+        'license.body': 'Download and try BLACK PHANTOM free for 2 days. Then activate with a monthly or 3-month license key. One device per key.',
+        'license.weekly': 'Weekly',
+        'license.monthly': 'Monthly',
+        'license.yearly': 'Yearly',
+        'license.window': 'Activation',
+        'license.planMonthly': 'Monthly',
+        'license.planQuarterly': '3 Months',
+        'license.perMonth': 'per month',
+        'license.per3Months': 'for 3 months',
+        'license.feat1': 'Full access',
+        'license.feat2': '1 device',
+        'license.feat3': 'All updates',
+        'license.bestValue': 'Best Value',
+        'license.trialNote': '2-day free trial on every download',
+        'license.priceRegion': 'Detecting your region…',
+        'license.regionEgypt': 'Prices shown in Egyptian Pound (EGP)',
+        'license.regionGulf': 'Prices shown in USD — Gulf region',
+        'license.regionWorld': 'Prices shown in USD — International',
+        'faq.tag': 'FAQ',
+        'faq.title': 'Questions creators ask',
+        'faq.sub': 'Clear answers about activation, quality, and publishing with BLACK PHANTOM.',
+        'faq.q1': 'How do I activate my license?',
+        'faq.a1': 'Enter your key on first launch. One license per device. Make sure there are no extra spaces. If you changed PC, contact us on Telegram and we will help.',
+        'faq.q2': 'Why does my video look low quality on my profile?',
+        'faq.a2': 'TikTok often shows a softer preview on your own account. Open the post from another account or ask a friend. That is what viewers actually see.',
+        'faq.q3': 'How do I get the best quality on TikTok?',
+        'faq.a3': 'Import your video into BLACK PHANTOM, set blur or compress if needed, then export and publish through the app. Avoid re-uploading old files outside the workflow.',
+        'faq.q4': 'Upload failed or got stuck. What should I do?',
+        'faq.a4': 'Stay logged into TikTok Studio, keep a stable connection, and do not close the app while uploading. Restart BLACK PHANTOM and try again.',
+        'faq.q5': 'Can I use one license on two computers?',
+        'faq.a5': 'Each license works on one Windows device. If you replaced your PC, message support on Telegram.',
+        'faq.q6': 'What video formats are supported?',
+        'faq.a6': 'Import common video formats and export TikTok-ready MP4 from the app. Always publish through BLACK PHANTOM. Do not rename or convert files manually.',
+        'faq.q7': 'Low reach after posting. Is it the tool?',
+        'faq.a7': 'Reach depends on your content, timing, and account health. Not export alone. Strong hooks, relevant hashtags, and consistent posting matter most.',
+        'faq.q8': 'When should I use blur or compress?',
+        'faq.a8': 'Motion blur smooths fast gaming scenes. Compress helps large files before upload. Both are optional in Settings. Use what fits your clip.',
+        'contact.tag': 'Contact',
+        'contact.title': 'Get in touch',
+        'contact.sub': 'Support, licenses, and questions. Reach us directly on Telegram.',
+        'contact.desc': 'Fast replies for activation help, usage questions, and general support.',
+        'contact.btn': 'Open Telegram',
+        'cta.title': 'Ready to dominate<br>your TikTok feed?',
+        'cta.meta': 'v2.11.0, Windows 10/11, No admin required',
+        'cta.btn': 'Download BLACK PHANTOM v2.11.0',
+        'cta.support': 'Contact support: Telegram',
+        'footer.tagline': 'TikTok Quality. Built for creators.',
+        'footer.copy': '© 2026 Team Berlin',
+        'promo.text': 'Download TikTok & Instagram videos without watermark',
+        'promo.text2': 'Get any TikTok user info in seconds',
+        'promo.cta': 'Visit ReelHox →',
+        'promo.text': 'Download TikTok & Instagram videos without watermark',
+        'promo.text2': 'Get any TikTok user info in seconds',
+        'promo.cta': 'Visit ReelHox →',
+        'alt.heroVideo': 'BLACK PHANTOM app with gaming footage loaded',
+        'alt.step1': 'Empty app state, ready to import footage',
+        'alt.step2': 'Settings panel with quality options',
+        'alt.step3': 'Export screen with video ready to publish',
+        'alt.activate': 'License activation screen'
+      },
+      ar: {
+        'meta.title': 'BLACK PHANTOM أداة جودة TikTok للصنّاع',
+        'meta.description': 'أداة سطح مكتب شاملة لصنّاع محتوى TikTok في الألعاب. ضبابية حركة، تصدير ذكي، ونشر تلقائي في سير عمل واحد.',
+        'nav.download': 'تحميل',
+        'nav.home': 'الرئيسية',
+        'nav.how': 'طريقة الاستخدام',
+        'nav.features': 'المميزات',
+        'nav.faq': 'الأسئلة الشائعة',
+        'nav.contact': 'تواصل',
+        'hero.title': 'BLACK PHANTOM',
+        'hero.tagline': 'جودة TikTok احترافية وأتمتة النشر',
+        'hero.desc': 'أداة سطح المكتب لصنّاع محتوى الألعاب. ضبابية حركة، ضغط ذكي، تصدير بجودة TikTok، ونشر بنقرة واحدة على TikTok Studio.',
+        'hero.note': 'سير عمل واحد هادئ من اللقطة الخام إلى المنشور. لصنّاع يهتمون بالجودة.',
+        'strip.blur.label': 'ضبابية الحركة',
+        'strip.blur.desc': 'ضبابية احترافية للمشاهد السريعة في الألعاب',
+        'strip.export.label': 'تصدير ذكي',
+        'strip.export.desc': 'أعلى جودة متوافقة مع TikTok',
+        'strip.upload.label': 'رفع تلقائي',
+        'strip.upload.desc': 'بنقرة واحدة إلى TikTok Studio',
+        'strip.tier.label': 'مستوى الجودة',
+        'strip.tier.desc': 'الطبقة الزرقاء, 1080p, 60fps',
+        'how.tag': 'طريقة الاستخدام',
+        'how.title': 'ثلاث خطوات لجودة<br>TikTok الاحترافية.',
+        'how.sub': 'من اللقطات الخام إلى النشر. BLACK PHANTOM يدير خط الإنتاج بالكامل دون مغادرة جهازك.',
+        'how.step1.window': 'استيراد',
+        'how.step1.title': 'استورد الفيديو',
+        'how.step1.desc': 'اسحب لقطات الألعاب الخام إلى BLACK PHANTOM. يدعم 1080p و60fps وأي دقة.',
+        'how.step2.window': 'إعداد',
+        'how.step2.title': 'طبّق الإعدادات',
+        'how.step2.desc': 'اختر الفلتر، فعّل ضبابية الحركة أو الضغط إن احتجت، ثم حدّد جودة التصدير.',
+        'how.step3.window': 'تصدير ونشر',
+        'how.step3.title': 'صدّر وانشر',
+        'how.step3.desc': 'صدّر الفيديو. BLACK PHANTOM يجهّزه لـ TikTok ويمكنه النشر على TikTok Studio تلقائياً.',
+        'features.tag': 'المميزات',
+        'features.title': 'مصمّم للجودة.<br>مبني للسرعة.',
+        'features.quality.title': 'حزمة الجودة',
+        'features.quality.desc': 'خط جودة مدمج يحافظ على وضوح الفيديو على TikTok. محسّن لمحتوى الألعاب 1080×1920، بدون إعدادات معقدة.',
+        'features.quality.spec': '1080×1920, جاهز لـ TikTok',
+        'features.blur.title': 'محرك ضبابية الحركة',
+        'features.blur.desc': 'ضبابية حركة احترافية مدمجة في التصدير. إحساس سينمائي سلس للقطات السريعة.',
+        'features.blur.spec': 'Motion Blur, مدمج',
+        'features.compress.title': 'ضغط ذكي',
+        'features.compress.desc': 'ضغط اختياري يبقي الملف مناسباً لـ TikTok مع الحفاظ على التفاصيل المهمة.',
+        'features.compress.spec': 'Smart Compress, اختياري',
+        'features.publish.title': 'نشر بنقرة واحدة',
+        'features.publish.desc': 'املأ الوصف والهاشتاغات ثم انشر. BLACK PHANTOM يدير أتمتة TikTok Studio من البداية للنهاية.',
+        'features.publish.spec': 'TikTok Studio, آلي',
+        'license.tag': 'الترخيص',
+        'license.title': 'مفتاح واحد.<br>جهاز واحد.',
+        'license.body': 'حمّل BLACK PHANTOM وجرّبه مجاناً يومين. ثم فعّل بمفتاح شهري أو ثلاثة أشهر. جهاز واحد لكل مفتاح.',
+        'license.weekly': 'أسبوعي',
+        'license.monthly': 'شهري',
+        'license.yearly': 'سنوي',
+        'license.window': 'التفعيل',
+        'license.planMonthly': 'شهري',
+        'license.planQuarterly': 'ثلاثة أشهر',
+        'license.perMonth': 'شهرياً',
+        'license.per3Months': 'لمدة 3 أشهر',
+        'license.feat1': 'وصول كامل',
+        'license.feat2': 'جهاز واحد',
+        'license.feat3': 'جميع التحديثات',
+        'license.bestValue': 'الأوفر',
+        'license.trialNote': 'يومان تجريبيان مجانيان مع كل تحميل',
+        'license.priceRegion': 'جاري تحديد منطقتك…',
+        'license.regionEgypt': 'الأسعار بالجنيه المصري',
+        'license.regionGulf': 'الأسعار بالدولار الأمريكي — الخليج',
+        'license.regionWorld': 'الأسعار بالدولار الأمريكي — الدول الأجنبية',
+        'faq.tag': 'الأسئلة الشائعة',
+        'faq.title': 'أسئلة الصنّاع',
+        'faq.sub': 'إجابات واضحة عن التفعيل، الجودة، والنشر مع BLACK PHANTOM.',
+        'faq.q1': 'كيف أفعّل الترخيص؟',
+        'faq.a1': 'أدخل المفتاح عند أول تشغيل. ترخيص واحد لكل جهاز. تأكد من عدم وجود مسافات زائدة. إذا غيّرت الجهاز، تواصل معنا على Telegram.',
+        'faq.q2': 'لماذا يبدو الفيديو بجودة أقل على بروفايلي؟',
+        'faq.a2': 'TikTok غالباً يعرض معاينة أقل جودة على حسابك. افتح المنشور من حساب آخر أو اطلب من صديق. هذا ما يراه المتابعون.',
+        'faq.q3': 'كيف أحصل على أفضل جودة على TikTok؟',
+        'faq.a3': 'استورد الفيديو في BLACK PHANTOM، اضبط الضبابية أو الضغط إن لزم، ثم صدّر وانشر من التطبيق. تجنب إعادة رفع ملفات قديمة خارج سير العمل.',
+        'faq.q4': 'فشل الرفع أو توقف. ماذا أفعل؟',
+        'faq.a4': 'ابقَ مسجلاً في TikTok Studio، تأكد من اتصال مستقر، ولا تغلق التطبيق أثناء الرفع. أعد تشغيل BLACK PHANTOM وحاول مرة أخرى.',
+        'faq.q5': 'هل أستخدم ترخيصاً واحداً على جهازين؟',
+        'faq.a5': 'كل ترخيص يعمل على جهاز Windows واحد. إذا استبدلت جهازك، راسل الدعم على Telegram.',
+        'faq.q6': 'ما صيغ الفيديو المدعومة؟',
+        'faq.a6': 'استورد الصيغ الشائعة وصدّر MP4 جاهزاً لـ TikTok من التطبيق. انشر دائماً عبر BLACK PHANTOM. لا تغيّر اسم الملف أو تحوّله يدوياً.',
+        'faq.q7': 'وصول منخفض بعد النشر. هل السبب الأداة؟',
+        'faq.a7': 'الوصول يعتمد على المحتوى والتوقيت وصحة الحساب. ليس التصدير وحده. الـ hook القوي، الهاشتاغ المناسب، والانتظام أهم.',
+        'faq.q8': 'متى أستخدم الضبابية أو الضغط؟',
+        'faq.a8': 'ضبابية الحركة تنعّم المشاهد السريعة. الضغط يساعد الملفات الكبيرة قبل الرفع. كلاهما اختياري في الإعدادات. استخدم ما يناسب مقطعك.',
+        'contact.tag': 'تواصل',
+        'contact.title': 'تواصل معنا',
+        'contact.sub': 'الدعم، التراخيص، والأسئلة. تواصل معنا مباشرة على Telegram.',
+        'contact.desc': 'ردود سريعة لمساعدة التفعيل، أسئلة الاستخدام، والدعم العام.',
+        'contact.btn': 'فتح Telegram',
+        'cta.title': 'جاهز تسيطر<br>على TikTok؟',
+        'cta.meta': 'v2.11.0, Windows 10/11. بدون صلاحيات admin',
+        'cta.btn': 'تحميل BLACK PHANTOM v2.11.0',
+        'cta.support': 'الدعم: Telegram',
+        'footer.tagline': 'جودة TikTok. مصمّم للصنّاع.',
+        'footer.copy': '© 2026 Team Berlin',
+        'promo.text': 'حمّل فيديوهات TikTok وInstagram بدون علامة مائية',
+        'promo.text2': 'معلومات عن أي يوزر TikTok في ثانية',
+        'promo.cta': 'اضغط هنا ← ReelHox',
+        'alt.heroVideo': 'تطبيق BLACK PHANTOM مع فيديو ألعاب محمّل',
+        'alt.step1': 'واجهة فارغة, جاهزة لاستيراد الفيديو',
+        'alt.step2': 'لوحة الإعدادات مع خيارات الجودة',
+        'alt.step3': 'شاشة التصدير مع فيديو جاهز للنشر',
+        'alt.activate': 'شاشة تفعيل الترخيص'
+      }
+    };
+
+    function getNested(obj, key) {
+      return obj[key];
+    }
+
+    function applyLang(lang) {
+      const dict = T[lang] || T.en;
+      const isAr = lang === 'ar';
+
+      document.documentElement.lang = lang;
+      document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+
+      document.title = dict['meta.title'];
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.content = dict['meta.description'];
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = getNested(dict, key);
+        if (val == null) return;
+        if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+        else el.textContent = val;
+      });
+
+      document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+        const key = el.getAttribute('data-i18n-alt');
+        const val = getNested(dict, key);
+        if (val != null) el.alt = val;
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const val = getNested(dict, key);
+        if (val != null) el.placeholder = val;
+      });
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+
+      const langGroup = document.querySelector('.lang-switch');
+      if (langGroup) langGroup.setAttribute('aria-label', isAr ? 'اللغة' : 'Language');
+
+      localStorage.setItem(LANG_KEY, lang);
+    }
+
+    function detectLang() {
+      const saved = localStorage.getItem(LANG_KEY);
+      if (saved === 'en' || saved === 'ar') return saved;
+      const browser = (navigator.language || 'en').toLowerCase();
+      return browser.startsWith('ar') ? 'ar' : 'en';
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+    });
+
+    applyLang(detectLang());
+
+    /* FAQ accordion */
+    document.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(openItem => {
+          openItem.classList.remove('open');
+          openItem.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    /* Navbar: apply .scrolled class on scroll */
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    /* Fade-in via IntersectionObserver with staggered sibling delays */
+    const fiEls = document.querySelectorAll('.fi');
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+
+        const el = entry.target;
+        const siblings = Array.from(el.parentElement.querySelectorAll(':scope > .fi'));
+        const idx = siblings.indexOf(el);
+        if (idx > 0) {
+          el.style.transitionDelay = `${idx * 0.09}s`;
+        }
+
+        el.classList.add('in');
+        io.unobserve(el);
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -30px 0px'
+    });
+
+    fiEls.forEach(el => io.observe(el));
+
+    /* ============================================================
+       DYNAMIC PRICING — detect region via IP, show local prices
+    ============================================================ */
+    (function () {
+      const GULF = new Set(['SA', 'AE', 'KW', 'QA', 'BH', 'OM']);
+
+      const PRICES = {
+        EG: {
+          monthly: { amount: '550 ج.م', period: null },
+          quarterly: { amount: '1,050 ج.م', period: null },
+          regionKey: 'license.regionEgypt',
+        },
+        GULF: {
+          monthly: { amount: '$15', period: null },
+          quarterly: { amount: '$25', period: null },
+          regionKey: 'license.regionGulf',
+        },
+        WORLD: {
+          monthly: { amount: '$10', period: null },
+          quarterly: { amount: '$15', period: null },
+          regionKey: 'license.regionWorld',
+        },
+      };
+
+      function applyPrices(tier) {
+        const p = PRICES[tier];
+        const lang = localStorage.getItem('bp-lang') || 'en';
+        const dict = (window.__T && window.__T[lang]) || {};
+
+        const mEl = document.getElementById('priceMonthlyAmt');
+        const qEl = document.getElementById('priceQuarterlyAmt');
+        const rEl = document.getElementById('priceRegionLabel');
+
+        if (mEl) mEl.textContent = p.monthly.amount;
+        if (qEl) qEl.textContent = p.quarterly.amount;
+      }
+
+      function detectRegion(country) {
+        if (country === 'EG') return 'EG';
+        if (GULF.has(country)) return 'GULF';
+        return 'WORLD';
+      }
+
+      async function tryFetch(url, extract, ms) {
+        try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), ms);
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(timer);
+          if (!res.ok) return null;
+          const data = await res.json();
+          return extract(data) || null;
+        } catch {
+          return null;
+        }
+      }
+
+      async function fetchCountry() {
+        // 1. api.country.is — simplest, no rate limit
+        let cc = await tryFetch('https://api.country.is/', d => d.country, 4000);
+        if (cc) { console.log('[BP-PRICE] country.is:', cc); return cc; }
+
+        // 2. ipapi.co/json
+        cc = await tryFetch('https://ipapi.co/json/', d => d.country_code, 5000);
+        if (cc) { console.log('[BP-PRICE] ipapi.co:', cc); return cc; }
+
+        // 3. cloudflare trace (text parse)
+        try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 4000);
+          const res = await fetch('https://cloudflare.com/cdn-cgi/trace', { signal: ctrl.signal });
+          clearTimeout(timer);
+          const text = await res.text();
+          const m = text.match(/^loc=([A-Z]{2})/m);
+          if (m) { console.log('[BP-PRICE] cloudflare:', m[1]); return m[1]; }
+        } catch {}
+
+        console.warn('[BP-PRICE] all geo APIs failed → WORLD');
+        return 'WORLD';
+      }
+
+      // Store T reference for the pricing updater
+      window.__T = T;
+
+      fetchCountry().then(country => {
+        const tier = detectRegion(country);
+        applyPrices(tier);
+        // Re-apply when language changes
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            setTimeout(() => applyPrices(tier), 50);
+          });
+        });
+      });
+    })();
+
+  </script>
+
+</body>
+</html>
