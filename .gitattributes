@@ -1,0 +1,3 @@
+# GitHub auto-attaches source zip/tar on every release — cannot remove the links.
+# export-ignore empties those archives (installer is the only real download).
+* export-ignore
