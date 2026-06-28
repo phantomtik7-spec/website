@@ -1851,7 +1851,7 @@
             <!-- Monthly -->
             <div class="price-card">
               <div class="price-plan-label" data-i18n="license.planMonthly">Monthly</div>
-              <div class="price-amount" id="priceMonthlyAmt">$10</div>
+              <div class="price-amount" id="priceMonthlyAmt">—</div>
               <div class="price-period" data-i18n="license.perMonth">per month</div>
               <ul class="price-feat-list">
                 <li data-i18n="license.feat1">Full access</li>
@@ -1863,7 +1863,7 @@
             <div class="price-card featured">
               <div class="price-badge" data-i18n="license.bestValue">Best Value</div>
               <div class="price-plan-label" data-i18n="license.planQuarterly">3 Months</div>
-              <div class="price-amount" id="priceQuarterlyAmt">$15</div>
+              <div class="price-amount" id="priceQuarterlyAmt">—</div>
               <div class="price-period" data-i18n="license.per3Months">for 3 months</div>
               <ul class="price-feat-list">
                 <li data-i18n="license.feat1">Full access</li>
@@ -1872,6 +1872,11 @@
               </ul>
             </div>
           </div>
+
+          <p class="price-region" id="priceRegionLabel">
+            <span class="price-region-dot"></span>
+            <span id="priceRegionText">Detecting your region…</span>
+          </p>
 
           <p class="price-trial-note" data-i18n="license.trialNote">2-day free trial on every download</p>
         </div>
@@ -2130,9 +2135,7 @@
         'license.bestValue': 'Best Value',
         'license.trialNote': '2-day free trial on every download',
         'license.priceRegion': 'Detecting your region…',
-        'license.regionEgypt': 'Prices shown in Egyptian Pound (EGP)',
-        'license.regionGulf': 'Prices shown in USD — Gulf region',
-        'license.regionWorld': 'Prices shown in USD — International',
+        'license.regionPrices': 'Prices shown in {currency}',
         'faq.tag': 'FAQ',
         'faq.title': 'Questions creators ask',
         'faq.sub': 'Clear answers about activation, quality, and publishing with BLACK PHANTOM.',
@@ -2240,9 +2243,7 @@
         'license.bestValue': 'الأوفر',
         'license.trialNote': 'يومان تجريبيان مجانيان مع كل تحميل',
         'license.priceRegion': 'جاري تحديد منطقتك…',
-        'license.regionEgypt': 'الأسعار بالجنيه المصري',
-        'license.regionGulf': 'الأسعار بالدولار الأمريكي — الخليج',
-        'license.regionWorld': 'الأسعار بالدولار الأمريكي — الدول الأجنبية',
+        'license.regionPrices': 'الأسعار ب{currency}',
         'faq.tag': 'الأسئلة الشائعة',
         'faq.title': 'أسئلة الصنّاع',
         'faq.sub': 'إجابات واضحة عن التفعيل، الجودة، والنشر مع BLACK PHANTOM.',
@@ -2326,6 +2327,7 @@
       if (langGroup) langGroup.setAttribute('aria-label', isAr ? 'اللغة' : 'Language');
 
       localStorage.setItem(LANG_KEY, lang);
+      if (typeof window.__applyPrices === 'function') window.__applyPrices();
     }
 
     function detectLang() {
@@ -2421,46 +2423,194 @@
     });
 
     /* ============================================================
-       DYNAMIC PRICING — detect region via IP, show local prices
+       DYNAMIC PRICING — EGP base · local currency per country
     ============================================================ */
     (function () {
-      const GULF = new Set(['SA', 'AE', 'KW', 'QA', 'BH', 'OM']);
+      const EGP_MONTHLY = 200;
+      const EGP_QUARTERLY = 500;
 
-      const PRICES = {
-        EG: {
-          monthly: { amount: '550 ج.م', period: null },
-          quarterly: { amount: '1,050 ج.م', period: null },
-          regionKey: 'license.regionEgypt',
+      /** EGP value of 1 unit of each currency (approx. mid-2026) */
+      const EGP_PER_UNIT = {
+        EGP: 1,
+        USD: 49.5,
+        SAR: 13.2,
+        AED: 13.5,
+        KWD: 161,
+        QAR: 13.6,
+        BHD: 131,
+        OMR: 129,
+        JOD: 70,
+        MAD: 5.0,
+        TND: 15.5,
+        DZD: 0.367,
+        IQD: 0.038,
+        LYD: 10.3,
+        SDG: 0.082,
+        MRU: 1.24,
+        DJF: 0.28,
+        KMF: 0.11,
+      };
+
+      const CURRENCY_NAMES = {
+        en: {
+          EGP: 'Egyptian Pound (EGP)',
+          USD: 'US Dollar (USD)',
+          SAR: 'Saudi Riyal (SAR)',
+          AED: 'UAE Dirham (AED)',
+          KWD: 'Kuwaiti Dinar (KWD)',
+          QAR: 'Qatari Riyal (QAR)',
+          BHD: 'Bahraini Dinar (BHD)',
+          OMR: 'Omani Rial (OMR)',
+          JOD: 'Jordanian Dinar (JOD)',
+          MAD: 'Moroccan Dirham (MAD)',
+          TND: 'Tunisian Dinar (TND)',
+          DZD: 'Algerian Dinar (DZD)',
+          IQD: 'Iraqi Dinar (IQD)',
+          LYD: 'Libyan Dinar (LYD)',
+          SDG: 'Sudanese Pound (SDG)',
+          MRU: 'Mauritanian Ouguiya (MRU)',
+          DJF: 'Djiboutian Franc (DJF)',
+          KMF: 'Comorian Franc (KMF)',
         },
-        GULF: {
-          monthly: { amount: '$15', period: null },
-          quarterly: { amount: '$25', period: null },
-          regionKey: 'license.regionGulf',
-        },
-        WORLD: {
-          monthly: { amount: '$10', period: null },
-          quarterly: { amount: '$15', period: null },
-          regionKey: 'license.regionWorld',
+        ar: {
+          EGP: 'الجنيه المصري',
+          USD: 'الدولار الأمريكي',
+          SAR: 'الريال السعودي',
+          AED: 'الدرهم الإماراتي',
+          KWD: 'الدينار الكويتي',
+          QAR: 'الريال القطري',
+          BHD: 'الدينار البحريني',
+          OMR: 'الريال العُماني',
+          JOD: 'الدينار الأردني',
+          MAD: 'الدرهم المغربي',
+          TND: 'الدينار التونسي',
+          DZD: 'الدينار الجزائري',
+          IQD: 'الدينار العراقي',
+          LYD: 'الدينار الليبي',
+          SDG: 'الجنيه السوداني',
+          MRU: 'الأوقية الموريتانية',
+          DJF: 'الفرنك الجيبوتي',
+          KMF: 'الفرنك القمري',
         },
       };
 
-      function applyPrices(tier) {
-        const p = PRICES[tier];
-        const lang = localStorage.getItem('bp-lang') || 'en';
-        const dict = (window.__T && window.__T[lang]) || {};
+      const ARAB_CC = new Set([
+        'DZ', 'BH', 'KM', 'DJ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY',
+        'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'YE',
+      ]);
 
-        const mEl = document.getElementById('priceMonthlyAmt');
-        const qEl = document.getElementById('priceQuarterlyAmt');
-        const rEl = document.getElementById('priceRegionLabel');
+      const CC_CURRENCY = {
+        EG: 'EGP',
+        SA: 'SAR',
+        AE: 'AED',
+        KW: 'KWD',
+        QA: 'QAR',
+        BH: 'BHD',
+        OM: 'OMR',
+        JO: 'JOD',
+        PS: 'JOD',
+        MA: 'MAD',
+        TN: 'TND',
+        DZ: 'DZD',
+        IQ: 'IQD',
+        LY: 'LYD',
+        SD: 'SDG',
+        MR: 'MRU',
+        DJ: 'DJF',
+        KM: 'KMF',
+        LB: 'USD',
+        SY: 'USD',
+        YE: 'USD',
+        SO: 'USD',
+      };
 
-        if (mEl) mEl.textContent = p.monthly.amount;
-        if (qEl) qEl.textContent = p.quarterly.amount;
+      function egpToLocal(egp, currency) {
+        const rate = EGP_PER_UNIT[currency] || EGP_PER_UNIT.USD;
+        return egp / rate;
       }
 
-      function detectRegion(country) {
-        if (country === 'EG') return 'EG';
-        if (GULF.has(country)) return 'GULF';
-        return 'WORLD';
+      function formatAmount(value, currency) {
+        const v = Number(value);
+        if (!Number.isFinite(v)) return '—';
+        switch (currency) {
+          case 'USD':
+            return '$' + Math.round(v);
+          case 'EGP':
+            return Math.round(v).toLocaleString('en-US') + ' ج.م';
+          case 'SAR':
+            return Math.round(v) + ' ر.س';
+          case 'AED':
+            return Math.round(v) + ' د.إ';
+          case 'KWD':
+          case 'BHD':
+          case 'OMR':
+          case 'JOD':
+            return v.toFixed(1).replace(/\.0$/, '') + ' ' + ({ KWD: 'د.ك', BHD: 'د.ب', OMR: 'ر.ع', JOD: 'د.أ' }[currency]);
+          case 'QAR':
+            return Math.round(v) + ' ر.ق';
+          case 'MAD':
+            return Math.round(v) + ' د.م';
+          case 'TND':
+            return Math.round(v) + ' د.ت';
+          case 'DZD':
+            return Math.round(v).toLocaleString('en-US') + ' د.ج';
+          case 'IQD':
+            return Math.round(v / 100) * 100 + ' د.ع';
+          case 'LYD':
+            return v.toFixed(1).replace(/\.0$/, '') + ' د.ل';
+          case 'SDG':
+            return Math.round(v).toLocaleString('en-US') + ' ج.س';
+          case 'MRU':
+            return Math.round(v) + ' أ.م';
+          case 'DJF':
+            return Math.round(v).toLocaleString('en-US') + ' ف.ج';
+          case 'KMF':
+            return Math.round(v).toLocaleString('en-US') + ' ف.ق';
+          default:
+            return '$' + Math.round(v);
+        }
+      }
+
+      function resolvePricing(country) {
+        const cc = (country || '').toUpperCase();
+        let currency = 'USD';
+        if (ARAB_CC.has(cc)) {
+          currency = CC_CURRENCY[cc] || 'USD';
+        }
+        if (!EGP_PER_UNIT[currency]) currency = 'USD';
+        return {
+          currency,
+          monthly: formatAmount(egpToLocal(EGP_MONTHLY, currency), currency),
+          quarterly: formatAmount(egpToLocal(EGP_QUARTERLY, currency), currency),
+        };
+      }
+
+      let activePricing = null;
+      let geoReady = false;
+
+      function regionLabelText(currency, lang) {
+        const names = (CURRENCY_NAMES[lang] || CURRENCY_NAMES.en);
+        const name = names[currency] || names.USD;
+        const dict = (window.__T && window.__T[lang]) || {};
+        const tpl = dict['license.regionPrices'] || 'Prices shown in {currency}';
+        return tpl.replace('{currency}', name);
+      }
+
+      function applyPrices() {
+        const lang = localStorage.getItem('bp-lang') || 'en';
+        const dict = (window.__T && window.__T[lang]) || {};
+        const mEl = document.getElementById('priceMonthlyAmt');
+        const qEl = document.getElementById('priceQuarterlyAmt');
+        const span = document.getElementById('priceRegionText');
+
+        if (!geoReady || !activePricing) {
+          if (span) span.textContent = dict['license.priceRegion'] || 'Detecting your region…';
+          return;
+        }
+
+        if (mEl) mEl.textContent = activePricing.monthly;
+        if (qEl) qEl.textContent = activePricing.quarterly;
+        if (span) span.textContent = regionLabelText(activePricing.currency, lang);
       }
 
       async function tryFetch(url, extract, ms) {
@@ -2478,15 +2628,10 @@
       }
 
       async function fetchCountry() {
-        // 1. api.country.is — simplest, no rate limit
         let cc = await tryFetch('https://api.country.is/', d => d.country, 4000);
-        if (cc) { console.log('[BP-PRICE] country.is:', cc); return cc; }
-
-        // 2. ipapi.co/json
+        if (cc) return cc;
         cc = await tryFetch('https://ipapi.co/json/', d => d.country_code, 5000);
-        if (cc) { console.log('[BP-PRICE] ipapi.co:', cc); return cc; }
-
-        // 3. cloudflare trace (text parse)
+        if (cc) return cc;
         try {
           const ctrl = new AbortController();
           const timer = setTimeout(() => ctrl.abort(), 4000);
@@ -2494,24 +2639,20 @@
           clearTimeout(timer);
           const text = await res.text();
           const m = text.match(/^loc=([A-Z]{2})/m);
-          if (m) { console.log('[BP-PRICE] cloudflare:', m[1]); return m[1]; }
+          if (m) return m[1];
         } catch {}
-
-        console.warn('[BP-PRICE] all geo APIs failed → WORLD');
-        return 'WORLD';
+        return null;
       }
 
-      // Store T reference for the pricing updater
       window.__T = T;
+      window.__applyPrices = applyPrices;
 
       fetchCountry().then(country => {
-        const tier = detectRegion(country);
-        applyPrices(tier);
-        // Re-apply when language changes
+        geoReady = true;
+        activePricing = resolvePricing(country);
+        applyPrices();
         document.querySelectorAll('.lang-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            setTimeout(() => applyPrices(tier), 50);
-          });
+          btn.addEventListener('click', () => setTimeout(applyPrices, 50));
         });
       });
     })();
