@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/download",
-      "destination": "https://github.com/phantomtik7-spec/website/releases/download/v2.13.3/BLACK-PHANTOM-Setup-2.13.3.exe",
+      "destination": "https://github.com/phantomtik7-spec/website/releases/download/v2.13.4/BLACK-PHANTOM-Setup-2.13.4.exe",
       "permanent": false
     }
   ]
